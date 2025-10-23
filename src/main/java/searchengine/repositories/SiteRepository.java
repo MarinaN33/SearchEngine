@@ -3,16 +3,16 @@ package searchengine.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import searchengine.model.SiteEntity;
+import searchengine.model.Site;
 import java.util.Optional;
 
 /**
- * Репозиторий для работы с сущностью {@link SiteEntity}.
+ * Репозиторий для работы с сущностью {@link Site}.
  * <p>Содержит методы для поиска, удаления и проверки существования сайтов.</p>
  */
 
 @Repository
-public interface SiteRepository extends JpaRepository<SiteEntity, Integer> {
+public interface SiteRepository extends JpaRepository<Site, Integer> {
 
     /**
      * Находит сайт по его URL.
@@ -20,7 +20,7 @@ public interface SiteRepository extends JpaRepository<SiteEntity, Integer> {
      * @param url URL сайта
      * @return Optional с найденным сайтом
      */
-    Optional<SiteEntity> findByUrl(String url);
+    Optional<Site> findByUrl(String url);
 
     /**
      * Удаляет сайт по URL.
@@ -34,6 +34,5 @@ public interface SiteRepository extends JpaRepository<SiteEntity, Integer> {
      *
      * @return true, если есть хотя бы один сайт
      */
-    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM SiteEntity s")
-    boolean hasAnySites();
+    boolean existsBy();
 }

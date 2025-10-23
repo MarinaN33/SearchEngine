@@ -16,10 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "pages", indexes = {
-        @Index(name = "idx_path", columnList = "path")
+        @javax.persistence.Index(name = "idx_path", columnList = "path")
 })
 
-public class PageEntity {
+public class Page {
 
     /** Уникальный идентификатор записи. */
     @Id
@@ -30,7 +30,7 @@ public class PageEntity {
     /** Сайт, которому принадлежит страница */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "site_id", nullable = false)
-    private SiteEntity siteEntity;
+    private Site site;
 
     /** Путь страницы (например: "/about") */
     @Column(name = "path", nullable = false, columnDefinition = "TEXT")
@@ -45,6 +45,6 @@ public class PageEntity {
     private String content;
 
     /** Индексы (леммы и их веса), связанные с этой страницей */
-    @OneToMany(mappedBy = "pageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IndexEntity> indexEntityList;
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Index> indexList;
 }

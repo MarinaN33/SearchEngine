@@ -5,7 +5,7 @@ import searchengine.model.*;
 import java.time.LocalDateTime;
 
 /**
- * Фабрика сущностей для создания объектов {@link SiteEntity}, {@link PageEntity}, {@link LemmaEntity} и {@link IndexEntity}.
+ * Фабрика сущностей для создания объектов {@link Site}, {@link Page}, {@link Lemma} и {@link Index}.
  * <p>Используется для упрощенного создания и инициализации сущностей перед сохранением в базу данных.</p>
  */
 
@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 public class EntityFactory {
 
     /**
-     * Создает новый объект {@link SiteEntity} с начальным статусом {@link Status#INDEXING}.
+     * Создает новый объект {@link Site} с начальным статусом {@link Status#INDEXING}.
      *
      * @param name имя сайта
      * @param url  URL сайта
-     * @return объект {@link SiteEntity}
+     * @return объект {@link Site}
      */
-    public SiteEntity createSiteEntity(String name, String url){
-        SiteEntity site = new SiteEntity();
+    public Site createSiteEntity(String name, String url){
+        Site site = new Site();
         site.setStatus(Status.INDEXING);
         site.setName(name);
         site.setUrl(url);
@@ -29,18 +29,18 @@ public class EntityFactory {
     }
 
     /**
-     * Создает новый объект {@link PageEntity}.
+     * Создает новый объект {@link Page}.
      *
-     * @param siteEntity сайт, которому принадлежит страница
+     * @param site сайт, которому принадлежит страница
      * @param path       путь страницы
      * @param code       HTTP статус код
      * @param content    HTML содержимое страницы
-     * @return объект {@link PageEntity}
+     * @return объект {@link Page}
      */
-    public PageEntity createPageEntity(SiteEntity siteEntity,
-                                    String path, int code, String content){
-        PageEntity page = new PageEntity();
-        page.setSiteEntity(siteEntity);
+    public Page createPageEntity(Site site,
+                                 String path, int code, String content){
+        Page page = new Page();
+        page.setSite(site);
         page.setPath(path);
         page.setCode(code);
         page.setContent(content);
@@ -48,34 +48,34 @@ public class EntityFactory {
     }
 
     /**
-     * Создает новый объект {@link LemmaEntity}.
+     * Создает новый объект {@link Lemma}.
      *
-     * @param siteEntity сайт, которому принадлежит лемма
+     * @param site сайт, которому принадлежит лемма
      * @param lemma      текст леммы
      * @param count      частота встречаемости леммы
-     * @return объект {@link LemmaEntity}
+     * @return объект {@link Lemma}
      */
-    public LemmaEntity createLemmaEntity(SiteEntity siteEntity, String lemma, int count){
-        LemmaEntity lemmaEntity = new LemmaEntity();
-        lemmaEntity.setSiteEntity(siteEntity);
+    public Lemma createLemmaEntity(Site site, String lemma, int count){
+        Lemma lemmaEntity = new Lemma();
+        lemmaEntity.setSite(site);
         lemmaEntity.setLemma(lemma);
         lemmaEntity.setFrequency(count);
         return lemmaEntity;
     }
 
     /**
-     * Создает новый объект {@link IndexEntity}.
+     * Создает новый объект {@link Index}.
      *
-     * @param pageEntity  страница, к которой относится индекс
-     * @param lemmaEntity лемма, к которой относится индекс
+     * @param page  страница, к которой относится индекс
+     * @param lemma лемма, к которой относится индекс
      * @param rank        вес леммы на странице
-     * @return объект {@link IndexEntity}
+     * @return объект {@link Index}
      */
-    public IndexEntity createIndexEntity(PageEntity pageEntity, LemmaEntity lemmaEntity, float rank){
-        IndexEntity indexEntity = new IndexEntity();
-        indexEntity.setPageEntity(pageEntity);
-        indexEntity.setLemmaEntity(lemmaEntity);
-        indexEntity.setRank(rank);
-        return indexEntity;
+    public Index createIndexEntity(Page page, Lemma lemma, float rank){
+        Index index = new Index();
+        index.setPage(page);
+        index.setLemma(lemma);
+        index.setRank(rank);
+        return index;
     }
 }

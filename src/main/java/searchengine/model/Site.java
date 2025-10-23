@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "sites")
 
-public class SiteEntity {
+public class Site {
 
     /** Уникальный идентификатор записи. */
     @Id
@@ -50,9 +50,9 @@ public class SiteEntity {
 
     /** Список страниц сайта */
     @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<PageEntity> pageEntityList = new ArrayList<>();
+    private final List<Page> pageList = new ArrayList<>();
 
     /** Список лемм сайта */
     @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<LemmaEntity> lemmaEntityList = new ArrayList<>();
+    private final List<Lemma> lemmaList = new ArrayList<>();
 }

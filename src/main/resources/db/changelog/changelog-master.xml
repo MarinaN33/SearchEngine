@@ -5,11 +5,13 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="1" author="rik">
+    <include file="db/changelog/init-tables.xml"/>
+
+    <changeSet id="1" author="Marina">
         <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
     </changeSet>
 
-    <changeSet id="2" author="rik">
+    <changeSet id="2" author="Marina">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="idx_path" tableName="pages"/>
@@ -20,7 +22,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="3" author="rik">
+    <changeSet id="3" author="Marina">
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="idx_path" tableName="pages"/>
@@ -31,7 +33,5 @@
             CREATE INDEX idx_path ON pages (path(255));
         </sql>
     </changeSet>
-
-
 
 </databaseChangeLog>

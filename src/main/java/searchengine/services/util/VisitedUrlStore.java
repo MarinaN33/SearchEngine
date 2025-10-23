@@ -3,7 +3,8 @@ package searchengine.services.util;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-import searchengine.model.SiteEntity;
+import searchengine.model.Site;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -28,10 +29,10 @@ public class VisitedUrlStore {
     private final Set<String> visited = ConcurrentHashMap.newKeySet();
 
     /**
-     * Словарь активных сайтов, ключ — URL сайта, значение — объект SiteEntity.
+     * Словарь активных сайтов, ключ — URL сайта, значение — объект Site.
      * Позволяет отслеживать текущие сайты, которые находятся в процессе индексации.
      */
-    private final Map<String, SiteEntity> activeSites = new ConcurrentHashMap<>();
+    private final Map<String, Site> activeSites = new ConcurrentHashMap<>();
 
 
     /**
@@ -58,9 +59,9 @@ public class VisitedUrlStore {
     /**
      * Помечает сайт как активный.
      *
-     * @param site объект SiteEntity сайта
+     * @param site объект Site сайта
      */
-    public void activateSite(SiteEntity site) {
+    public void activateSite(Site site) {
         activeSites.put(site.getUrl(), site);
     }
 
@@ -76,9 +77,9 @@ public class VisitedUrlStore {
     /**
      * Возвращает коллекцию активных сайтов.
      *
-     * @return коллекция объектов SiteEntity активных сайтов
+     * @return коллекция объектов Site активных сайтов
      */
-    public Collection<SiteEntity> getActiveSites() {
+    public Collection<Site> getActiveSites() {
         return activeSites.values();
     }
 

@@ -19,7 +19,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="search_indexes")
 
-public class IndexEntity {
+public class Index {
 
     /** Уникальный идентификатор записи. */
     @Id
@@ -29,12 +29,12 @@ public class IndexEntity {
     /** Ссылка на страницу, где встречается лемма. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "page_id", nullable = false)
-    private PageEntity pageEntity;
+    private Page page;
 
     /** Ссылка на лемму, встречающуюся на странице. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lemma_id", nullable = false)
-    private LemmaEntity lemmaEntity;
+    private Lemma lemma;
 
     /** Вес (значимость) леммы на данной странице. */
     @Column(name = "rank_value", nullable = false)

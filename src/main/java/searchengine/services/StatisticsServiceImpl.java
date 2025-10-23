@@ -8,7 +8,7 @@ import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.TotalStatistics;
 import searchengine.logs.LogTag;
-import searchengine.model.SiteEntity;
+import searchengine.model.Site;
 import searchengine.services.serviceinterfaces.StatisticsService;
 import searchengine.services.util.IndexingContext;
 import searchengine.services.util.Stopwatch;
@@ -47,7 +47,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     @Override
     public StatisticsResponse getStatistics() {
-        List<SiteEntity> sites = context.getDataManager().getAllSites();
+        List<Site> sites = context.getDataManager().getAllSites();
         log.info("{}  Формирование статистики для {} сайтов", TAG, sites.size());
 
         stopwatch.start();
@@ -75,13 +75,13 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @param sites список сайтов
      * @return {@link TotalStatistics} с суммарным количеством страниц, лемм и состоянием индексации
      */
-    private TotalStatistics calculateTotal(List<SiteEntity> sites) {
+    private TotalStatistics calculateTotal(List<Site> sites) {
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.size());
         total.setIndexing(indexingServiceImp.isIndexing());
 
-        for (SiteEntity site : sites) {
-            int pages = site.getPageEntityList().size();
+        for (Site site : sites) {
+            int pages = site.getPageList().size();
             int lemmas = context.getDataManager().getCountLemmasBySite(site);
 
             total.setPages(total.getPages() + pages);
@@ -97,10 +97,10 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @param sites список сайтов
      * @return список {@link DetailedStatisticsItem} с информацией по каждому сайту
      */
-    private List<DetailedStatisticsItem> buildDetailedStatistics(List<SiteEntity> sites) {
+    private List<DetailedStatisticsItem> buildDetailedStatistics(List<Site> sites) {
         List<DetailedStatisticsItem> detailed = new ArrayList<>();
 
-        for (SiteEntity site : sites) {
+        for (Site site : sites) {
             DetailedStatisticsItem item = mapSiteToStatisticsItem(site);
             detailed.add(item);
         }
@@ -108,12 +108,12 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
-     * Преобразует объект SiteEntity в DetailedStatisticsItem.
+     * Преобразует объект Site в DetailedStatisticsItem.
      *
      * @param site сайт
      * @return {@link DetailedStatisticsItem} с подробной информацией
      */
-    private DetailedStatisticsItem mapSiteToStatisticsItem(SiteEntity site) {
+    private DetailedStatisticsItem mapSiteToStatisticsItem(Site site) {
         DetailedStatisticsItem item = new DetailedStatisticsItem();
 
         item.setName(site.getName());
@@ -124,7 +124,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli());
-        item.setPages(site.getPageEntityList().size());
+        item.setPages(site.getPageList().size());
         item.setLemmas(context.getDataManager().getCountLemmasBySite(site));
 
         return item;

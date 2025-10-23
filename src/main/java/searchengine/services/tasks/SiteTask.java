@@ -2,9 +2,8 @@ package searchengine.services.tasks;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import searchengine.config.Site;
 import searchengine.logs.LogTag;
-import searchengine.model.SiteEntity;
+import searchengine.model.Site;
 import searchengine.model.Status;
 import searchengine.services.util.IndexingContext;
 import java.time.LocalDateTime;
@@ -24,8 +23,8 @@ import java.util.stream.Collectors;
 public class SiteTask extends RecursiveAction {
 
     private static final LogTag TAG = LogTag.SITE_TASK;
-    private final Site site;
-    private SiteEntity siteEntity;
+    private final searchengine.config.Site site;
+    private Site site;
     private final IndexingContext context;
 
     @Override
@@ -35,9 +34,9 @@ public class SiteTask extends RecursiveAction {
 
         if (context.shouldStop("SiteTask-" + site.getUrl())) return;
 
-         siteEntity = context.getEntityFactory().createSiteEntity(site.getName(), site.getUrl());
-         context.getDataManager().saveSite(siteEntity);
-         context.getVisitedUrlStore().activateSite(siteEntity);
+         site = context.getEntityFactory().createSiteEntity(site.getName(), site.getUrl());
+         context.getDataManager().saveSite(site);
+         context.getVisitedUrlStore().activateSite(site);
 
         try {
             log.info("{}  Обработка сайта: {}", TAG, site.getUrl());
@@ -50,7 +49,7 @@ public class SiteTask extends RecursiveAction {
 
             List<PageTask> pageTasks = pages.stream()
                     .filter(context.getVisitedUrlStore()::visitUrl)
-                    .map(url -> new PageTask(url, site.getUrl(), context, siteEntity))
+                    .map(url -> new PageTask(url, site.getUrl(), context, site))
                     .collect(Collectors.toList());
 
             if (!pageTasks.isEmpty()) {
@@ -62,12 +61,12 @@ public class SiteTask extends RecursiveAction {
             if (hasFailedPages) {
                 failSite("Одна или несколько страниц завершились с ошибкой");
            } else {
-                siteEntity.setStatus(Status.INDEXED);
-                siteEntity.setLastError(null);
-                siteEntity.setStatusTime(LocalDateTime.now());
-                context.getDataManager().saveSite(siteEntity);
+                site.setStatus(Status.INDEXED);
+                site.setLastError(null);
+                site.setStatusTime(LocalDateTime.now());
+                context.getDataManager().saveSite(site);
                 log.info("{}  идет подсчет веса лемм", TAG);
-                context.getLemmaFrequencyService().recalculateRankForAllSites(siteEntity);
+                context.getLemmaFrequencyService().recalculateRankForAllSites(site);
                 log.info("{}  подсчет веса лемм завершен", TAG);
             }
 
@@ -78,10 +77,10 @@ public class SiteTask extends RecursiveAction {
     }
 
     private void failSite(String message) {
-        siteEntity.setStatus(Status.FAILED);
-        siteEntity.setLastError(message);
-        siteEntity.setStatusTime(LocalDateTime.now());
-        context.getDataManager().saveSite(siteEntity);
+        site.setStatus(Status.FAILED);
+        site.setLastError(message);
+        site.setStatusTime(LocalDateTime.now());
+        context.getDataManager().saveSite(site);
     }
 
 }

@@ -10,24 +10,25 @@ rickbot:
     - "RickBot/1.0 (compatible; MSIE 10.0; Windows NT)"
   min-delay-ms: 500
   max-delay-ms: 2000
-  referer: "https://github.com/Rik137/searchengine/blob/main/README.md"
+  referer: "https://github.com/MarinaN33/searchengine/blob/main/README.md"
 
 
 spring:
-  liquibase:
-    change-log: classpath:db/changelog/changelog-master.xml
+
   datasource:
     username: root
     password: Ric137!Marina!
-    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:postgresql://localhost:5432/search_engine
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
     show-sql: false
 
+    liquibase:
+      change-log: classpath:db/changelog/changelog-master.xml
 
 indexing-settings:
   sites:

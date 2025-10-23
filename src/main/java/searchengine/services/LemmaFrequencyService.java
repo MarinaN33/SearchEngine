@@ -47,9 +47,9 @@ public class LemmaFrequencyService {
      * @param page страница, для которой нужно уменьшить частоты
      */
     @Transactional
-    public void decreaseLemmaFrequencies(PageEntity page) {
+    public void decreaseLemmaFrequencies(Page page) {
         String content = page.getContent();
-        SiteEntity site = page.getSiteEntity();
+        Site site = page.getSite();
         if (content == null || content.isBlank()) {
             log.warn("{}  Пустой контент для страницы id={}", TAG, page.getId());
             return;
@@ -78,13 +78,13 @@ public class LemmaFrequencyService {
     }
 
     /**
-     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(PageEntity, String)}
+     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(Page, String)}
      *
      * @param page страница для индексации
      * @param content контент страницы
      */
     @Transactional
-    public void savePageLemmasAndIndexes(PageEntity page, String content) {
+    public void savePageLemmasAndIndexes(Page page, String content) {
         if (content == null || content.isBlank()) {
             log.warn("{}  Пустой контент, сохранение лемм пропущено для страницы id={}", TAG, page.getId());
             return;
@@ -94,33 +94,33 @@ public class LemmaFrequencyService {
             String lemmaName = entry.getKey();
             int frequencyToAdd = entry.getValue();
 
-            Optional<LemmaEntity> lemmaOpt = dataManager.findLemma(
+            Optional<Lemma> lemmaOpt = dataManager.findLemma(
                     lemmaName,
-                    page.getSiteEntity().getId()
+                    page.getSite().getId()
             );
-            LemmaEntity lemmaEntity;
+            Lemma lemma;
 
             if (lemmaOpt.isEmpty()) {
-                lemmaEntity = entityFactory.createLemmaEntity(page.getSiteEntity(), lemmaName, frequencyToAdd);
-                dataManager.saveLemma(lemmaEntity);
+                lemma = entityFactory.createLemmaEntity(page.getSite(), lemmaName, frequencyToAdd);
+                dataManager.saveLemma(lemma);
                 log.debug("{}  Создана новая лемма '{}'", TAG, lemmaName);
             } else {
-                lemmaEntity = lemmaOpt.get();
-                lemmaEntity.setFrequency(lemmaEntity.getFrequency() + frequencyToAdd);
-                dataManager.saveLemma(lemmaEntity);
+                lemma = lemmaOpt.get();
+                lemma.setFrequency(lemma.getFrequency() + frequencyToAdd);
+                dataManager.saveLemma(lemma);
             }
-            IndexEntity index = entityFactory.createIndexEntity(page, lemmaEntity, frequencyToAdd);
+            Index index = entityFactory.createIndexEntity(page, lemma, frequencyToAdd);
             dataManager.saveIndex(index);
         }
     }
 
     /**
-     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(PageEntity, String)}
+     * Потокобезопасная версия {@link #savePageLemmasAndIndexes(Page, String)}
      *
      * @param page страница для индексации
      * @param content контент страницы
      */
-    public synchronized void savePageLemmasAndIndexesThreadSafe(PageEntity page, String content) {
+    public synchronized void savePageLemmasAndIndexesThreadSafe(Page page, String content) {
         savePageLemmasAndIndexes(page, content);
     }
 
@@ -131,15 +131,15 @@ public class LemmaFrequencyService {
      * @param site сайт для пересчета рангов
      */
     @Transactional
-    public void recalculateRankForAllSites(SiteEntity site) {
+    public void recalculateRankForAllSites(Site site) {
         int totalPages = dataManager.getCountPagesBySite(site);
-        List<LemmaEntity> lemmas = dataManager.findAllLemmasBySite(site);
+        List<Lemma> lemmas = dataManager.findAllLemmasBySite(site);
 
-        for (LemmaEntity lemma : lemmas) {
+        for (Lemma lemma : lemmas) {
             int df = dataManager.getCountPagesWhereLemma(lemma, site);
-            List<IndexEntity> indexes = dataManager.getAllIndexesBySite(lemma, site);
+            List<Index> indexes = dataManager.getAllIndexesBySite(lemma, site);
 
-            for (IndexEntity index : indexes) {
+            for (Index index : indexes) {
                 float tf = index.getRank();
                 float newRank = (float) (tf * Math.log((double) totalPages / (df + 1)));
                 index.setRank(newRank);
@@ -157,7 +157,7 @@ public class LemmaFrequencyService {
      * @param url сайт или конкретная страница (может быть null)
      * @return список сущностей лемм из БД
      */
-    private List<LemmaEntity> getLemmaFromDataBase(List<String> lemmas, String url) {
+    private List<Lemma> getLemmaFromDataBase(List<String> lemmas, String url) {
         return (url == null || url.isBlank())
                 ? dataManager.findLemmas(lemmas)
                 : dataManager.findLemmas(lemmas, url);
@@ -182,21 +182,21 @@ public class LemmaFrequencyService {
             return List.of();
         }
 
-        List<LemmaEntity> lemmasEntity = getLemmaFromDataBase(lemmas, url);
+        List<Lemma> lemmasEntity = getLemmaFromDataBase(lemmas, url);
         if (lemmasEntity.isEmpty()) {
             log.warn("{}  Не найдено лемм в БД для запроса '{}'", TAG, query);
             return List.of();
         }
 
 
-        List<LemmaEntity> filtered = lemmasEntity.stream()
+        List<Lemma> filtered = lemmasEntity.stream()
                 .filter(lemma -> {
-                    float totalPages = dataManager.getCountPagesBySite(lemma.getSiteEntity());
+                    float totalPages = dataManager.getCountPagesBySite(lemma.getSite());
                     float onePercent = totalPages / 100.0f;
-                    float lemmaPercent = lemma.getIndexEntityList().size() / onePercent;
+                    float lemmaPercent = lemma.getIndexList().size() / onePercent;
                     return lemmaPercent <= PERCENT;
                 })
-                .sorted(Comparator.comparingInt(LemmaEntity::getFrequency))
+                .sorted(Comparator.comparingInt(Lemma::getFrequency))
                 .toList();
 
         if (filtered.isEmpty()) {
@@ -204,14 +204,14 @@ public class LemmaFrequencyService {
             return List.of();
         }
 
-        List<IndexEntity> indexes = findIndexesForAllLemmas(filtered, url);
+        List<Index> indexes = findIndexesForAllLemmas(filtered, url);
         if (indexes.isEmpty()) {
             log.info("{}  Поиск не дал результатов — пересечение пусто", TAG);
             return List.of();
         }
 
-        Map<PageEntity, Float> absolute = calcAbsoluteRank(indexes);
-        Map<PageEntity, Float> relative = calcRelativeRank(absolute, indexes, lemmas);
+        Map<Page, Float> absolute = calcAbsoluteRank(indexes);
+        Map<Page, Float> relative = calcRelativeRank(absolute, indexes, lemmas);
         SearchBuilder builder = new SearchBuilder();
         List<SearchResult> results = builder.build(relative, offset, limit, query);
 
@@ -227,23 +227,23 @@ public class LemmaFrequencyService {
      * @param url сайт или null
      * @return список индексов страниц
      */
-    private List<IndexEntity> findIndexesForAllLemmas(List<LemmaEntity> lemmas, String url) {
+    private List<Index> findIndexesForAllLemmas(List<Lemma> lemmas, String url) {
         if (lemmas.isEmpty()) return List.of();
 
         if (url != null && !url.isBlank()) {
-            List<IndexEntity> baseIndexes = new ArrayList<>(lemmas.get(0).getIndexEntityList());
+            List<Index> baseIndexes = new ArrayList<>(lemmas.get(0).getIndexList());
             for (int i = 1; i < lemmas.size(); i++) {
-                Set<Integer> pagesWithCurrentLemma = lemmas.get(i).getIndexEntityList().stream()
-                        .map(idx -> idx.getPageEntity().getId())
+                Set<Integer> pagesWithCurrentLemma = lemmas.get(i).getIndexList().stream()
+                        .map(idx -> idx.getPage().getId())
                         .collect(Collectors.toSet());
                 baseIndexes = baseIndexes.stream()
-                        .filter(idx -> pagesWithCurrentLemma.contains(idx.getPageEntity().getId()))
+                        .filter(idx -> pagesWithCurrentLemma.contains(idx.getPage().getId()))
                         .toList();
             }
             return baseIndexes;
         } else {
             return lemmas.stream()
-                    .flatMap(l -> l.getIndexEntityList().stream())
+                    .flatMap(l -> l.getIndexList().stream())
                     .distinct() // убираем дубликаты
                     .toList();
         }
@@ -256,10 +256,10 @@ public class LemmaFrequencyService {
      * @param indexes список индексов
      * @return карта страниц и их абсолютного ранга
      */
-    private Map<PageEntity, Float> calcAbsoluteRank(List<IndexEntity> indexes) {
-        Map<PageEntity, Float> pageRanks = new HashMap<>();
-        for (IndexEntity idx : indexes) {
-            pageRanks.merge(idx.getPageEntity(), idx.getRank(), Float::sum);
+    private Map<Page, Float> calcAbsoluteRank(List<Index> indexes) {
+        Map<Page, Float> pageRanks = new HashMap<>();
+        for (Index idx : indexes) {
+            pageRanks.merge(idx.getPage(), idx.getRank(), Float::sum);
         }
         log.info("{}  Вычислена абсолютная релевантность для {} страниц", TAG, pageRanks.size());
         return pageRanks;
@@ -274,18 +274,18 @@ public class LemmaFrequencyService {
      * @param queryLemmas список лемм поискового запроса
      * @return карта страниц и их относительного ранга, отсортированная по убыванию
      */
-    private Map<PageEntity, Float> calcRelativeRank(Map<PageEntity, Float> absoluteRanks, List<IndexEntity> indexes, List<String> queryLemmas) {
+    private Map<Page, Float> calcRelativeRank(Map<Page, Float> absoluteRanks, List<Index> indexes, List<String> queryLemmas) {
         if (absoluteRanks.isEmpty()) return Map.of();
-        Map<PageEntity, Integer> lemmaMatches = new HashMap<>();
-        for (IndexEntity idx : indexes) {
-            lemmaMatches.merge(idx.getPageEntity(), 1, Integer::sum);
+        Map<Page, Integer> lemmaMatches = new HashMap<>();
+        for (Index idx : indexes) {
+            lemmaMatches.merge(idx.getPage(), 1, Integer::sum);
         }
 
         float maxRank = absoluteRanks.values().stream().max(Float::compare).orElse(1.0f);
-        Map<PageEntity, Float> relativeRanks = new HashMap<>();
+        Map<Page, Float> relativeRanks = new HashMap<>();
 
-        for (Map.Entry<PageEntity, Float> entry : absoluteRanks.entrySet()) {
-            PageEntity page = entry.getKey();
+        for (Map.Entry<Page, Float> entry : absoluteRanks.entrySet()) {
+            Page page = entry.getKey();
             float base = entry.getValue() / maxRank;
             int matchCount = lemmaMatches.getOrDefault(page, 0);
             float weight = 1.0f + (matchCount / (float) queryLemmas.size());
@@ -293,7 +293,7 @@ public class LemmaFrequencyService {
         }
 
         return relativeRanks.entrySet().stream()
-                .sorted(Map.Entry.<PageEntity, Float>comparingByValue().reversed())
+                .sorted(Map.Entry.<Page, Float>comparingByValue().reversed())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,

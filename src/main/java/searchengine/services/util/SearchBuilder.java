@@ -4,7 +4,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import searchengine.dto.search.SearchResult;
 import searchengine.logs.LogTag;
-import searchengine.model.PageEntity;
+import searchengine.model.Page;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +42,7 @@ public class SearchBuilder {
      * @param query поисковый запрос, используется для подсветки слов в сниппете
      * @return список {@link SearchResult} с заполненными сниппетами и заголовками
      */
-    public List<SearchResult> build(Map<PageEntity, Float> rankedPages, int offset, int limit, String query) {
+    public List<SearchResult> build(Map<Page, Float> rankedPages, int offset, int limit, String query) {
         if (rankedPages.isEmpty()) return List.of();
 
         List<String> queryWords = Arrays.stream(query.toLowerCase().split("\\s+"))
@@ -124,11 +125,11 @@ public class SearchBuilder {
      * @param queryWords список слов запроса
      * @return {@link SearchResult} для данной страницы
      */
-    private SearchResult createSearchResult(PageEntity page, float relevance, List<String> queryWords) {
-        String siteUrl = Optional.ofNullable(page.getSiteEntity())
+    private SearchResult createSearchResult(Page page, float relevance, List<String> queryWords) {
+        String siteUrl = Optional.ofNullable(page.getSite())
                 .map(s -> s.getUrl())
                 .orElse("");
-        String siteName = Optional.ofNullable(page.getSiteEntity())
+        String siteName = Optional.ofNullable(page.getSite())
                 .map(s -> s.getName())
                 .orElse("(без имени)");
         String pagePath = Optional.ofNullable(page.getPath()).orElse("");

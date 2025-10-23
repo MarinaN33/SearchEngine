@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "lemmas")
-public class LemmaEntity {
+public class Lemma {
 
     /** Уникальный идентификатор записи. */
     @Id
@@ -27,7 +27,7 @@ public class LemmaEntity {
     /** Сайт, к которому относится лемма */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "site_id", nullable = false)
-    private SiteEntity siteEntity;
+    private Site site;
 
     /** Текст леммы (например: "поиск") */
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")
@@ -38,6 +38,6 @@ public class LemmaEntity {
     private int frequency;
 
     /** Список индексов, где используется данная лемма */
-    @OneToMany(mappedBy = "lemmaEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IndexEntity> indexEntityList;
+    @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Index> indexList;
 }

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.logs.LogTag;
-import searchengine.model.SiteEntity;
+import searchengine.model.Site;
 import searchengine.model.Status;
 import searchengine.services.tasks.SitesTask;
 import searchengine.services.util.IndexingContext;
@@ -78,8 +78,8 @@ public class ManagerTasks {
      * <p>Все активные сайты получают статус FAILED с указанием ошибки.
      */
     private void updateSitesAfterStop() {
-        Collection<SiteEntity> activeSites = context.getVisitedUrlStore().getActiveSites();
-        for (SiteEntity site : activeSites) {
+        Collection<Site> activeSites = context.getVisitedUrlStore().getActiveSites();
+        for (Site site : activeSites) {
             site.setStatus(Status.FAILED);
             site.setLastError("Пользователь остановил индексацию");
             site.setStatusTime(LocalDateTime.now());

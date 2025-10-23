@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import searchengine.dto.PageResponse;
 import searchengine.logs.LogTag;
-import searchengine.model.PageEntity;
-import searchengine.model.SiteEntity;
+import searchengine.model.Page;
+import searchengine.model.Site;
 import searchengine.services.util.IndexingContext;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class PageTask extends RecursiveAction {
     private final String url;
     private final String siteDomain;
     private final IndexingContext context;
-    private final SiteEntity siteEntity;
+    private final Site site;
 
     @Override
     protected void compute() {
@@ -37,8 +37,8 @@ public class PageTask extends RecursiveAction {
             PageResponse resp = context.getManagerJSOUP().fetchPageWithContent(url);
             String htmlBody = (resp.getBody() != null) ? resp.getBody() : "<html><body></body></html>";
 
-            PageEntity page = context.getEntityFactory().createPageEntity(
-                    siteEntity,
+            Page page = context.getEntityFactory().createPageEntity(
+            site,
                     url,
                     resp.getStatusCode(),
                     htmlBody
@@ -52,7 +52,7 @@ public class PageTask extends RecursiveAction {
                         .getLinksFromPage(url, siteDomain)
                         .stream()
                         .filter(context.getVisitedUrlStore()::visitUrl)
-                        .map(link -> new PageTask(link, siteDomain, context, siteEntity))
+                        .map(link -> new PageTask(link, siteDomain, context, site))
                         .toList();
                 if (!refs.isEmpty()) invokeAll(refs);
             }

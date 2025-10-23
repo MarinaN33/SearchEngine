@@ -3,17 +3,17 @@ package searchengine.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import searchengine.model.LemmaEntity;
-import searchengine.model.SiteEntity;
+import searchengine.model.Lemma;
+import searchengine.model.Site;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Репозиторий для работы с сущностью {@link LemmaEntity}.
+ * Репозиторий для работы с сущностью {@link Lemma}.
  * <p>Содержит методы для поиска, подсчета и выборки лемм по сайтам.</p>
  */
 
-public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
+public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
 
     /**
      * Находит лемму по тексту и ID сайта.
@@ -22,8 +22,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param siteId ID сайта
      * @return Optional с найденной леммой
      */
-    @Query("SELECT l FROM LemmaEntity l WHERE l.lemma = :lemma AND l.siteEntity.id = :siteId")
-    Optional<LemmaEntity> findByLemmaAndSiteId(@Param("lemma") String lemma, @Param("siteId") Integer siteId);
+    Optional<Lemma> findByLemmaAndSiteEntity_Id(String lemma, Integer siteId);
 
     /**
      * Находит лемму по тексту и объекту сайта.
@@ -32,8 +31,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param site объект сайта
      * @return Optional с найденной леммой
      */
-    @Query("SELECT l FROM LemmaEntity l WHERE l.lemma = :lemma AND l.siteEntity = :site")
-    Optional<LemmaEntity> findByLemmaAndSite(@Param("lemma") String lemma, @Param("site") SiteEntity site);
+    Optional<Lemma> findByLemmaAndSite(String lemma, Site site);
 
 
     /**
@@ -41,7 +39,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      *
      * @return true, если есть хотя бы одна лемма
      */
-    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM LemmaEntity l")
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Lemma l")
     boolean hasAnyLemmas();
 
     /**
@@ -50,8 +48,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param site объект сайта
      * @return список лемм
      */
-    @Query("SELECT l FROM LemmaEntity l WHERE l.siteEntity = :site")
-    List<LemmaEntity> findAllBySite(@Param("site") SiteEntity site);
+    List<Lemma> findBySiteEntity(Site site);
 
     /**
      * Получает все леммы по списку текстов.
@@ -59,7 +56,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param names список текстов лемм
      * @return список лемм
      */
-    List<LemmaEntity> findByLemmaIn(List<String> names);
+    List<Lemma> findByLemmaIn(List<String> names);
 
     /**
      * Получает леммы по списку текстов и URL сайта.
@@ -68,7 +65,7 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param siteUrl URL сайта
      * @return список лемм
      */
-    List<LemmaEntity> findByLemmaInAndSiteEntity_Url(List<String> names, String siteUrl);
+    List<Lemma> findByLemmaInAndSiteEntity_Url(List<String> names, String siteUrl);
 
     /**
      * Подсчитывает количество лемм для сайта по ID.
@@ -76,7 +73,6 @@ public interface LemmaRepository extends JpaRepository<LemmaEntity, Integer> {
      * @param siteId ID сайта
      * @return количество лемм
      */
-    @Query("SELECT COUNT(l) FROM LemmaEntity l WHERE l.siteEntity.id = :siteId")
-    int countLemmasBySite(@Param("siteId") Integer siteId);
+    int countBySiteEntity_Id(Integer siteId);
 }
 

@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.dto.PageResponse;
 import searchengine.logs.LogTag;
-import searchengine.model.PageEntity;
-import searchengine.model.SiteEntity;
+import searchengine.model.Page;
+import searchengine.model.Site;
 import searchengine.services.serviceinterfaces.PageIndexingService;
 import searchengine.services.util.IndexingContext;
 import searchengine.services.util.Stopwatch;
@@ -58,9 +58,9 @@ public class PageIndexingServiceImpl implements PageIndexingService {
             return false;
         }
 
-        SiteEntity siteEntity = findSiteForUrl(url);
+        Site site = findSiteForUrl(url);
 
-        if (siteEntity == null) {
+        if (site == null) {
             log.warn("{}  Страница {} не принадлежит ни одному сайту из БД", TAG, url);
             return false;
         }
@@ -73,10 +73,10 @@ public class PageIndexingServiceImpl implements PageIndexingService {
                     log.info("{}  Старая страница {} удалена перед обновлением", TAG, url);
                 });
 
-        savePageAndLemmas(siteEntity, url, response);
+        savePageAndLemmas(site, url, response);
         stopwatch.stop();
         log.info("{}  Страница {} успешно сохранена для сайта {}. Время индексации: {} сек.",
-                TAG, url, siteEntity.getUrl(), stopwatch.getSeconds());
+                TAG, url, site.getUrl(), stopwatch.getSeconds());
         stopwatch.reset();
         return true;
     }
@@ -85,10 +85,10 @@ public class PageIndexingServiceImpl implements PageIndexingService {
      * Находит сайт в БД, которому принадлежит указанный URL.
      *
      * @param url URL страницы
-     * @return {@link SiteEntity} сайта или null, если сайт не найден
+     * @return {@link Site} сайта или null, если сайт не найден
      */
-    private SiteEntity findSiteForUrl(String url) {
-        List<SiteEntity> sites = context.getDataManager().getAllSites();
+    private Site findSiteForUrl(String url) {
+        List<Site> sites = context.getDataManager().getAllSites();
 
         if (sites.isEmpty()) {
             log.warn("{}  База сайтов пуста! Добавьте хотя бы один сайт.", TAG);
@@ -97,7 +97,7 @@ public class PageIndexingServiceImpl implements PageIndexingService {
 
         try {
             URL inputURL = new URL(url);
-            for (SiteEntity site : sites) {
+            for (Site site : sites) {
                 try {
                     URL siteURL = new URL(site.getUrl());
                     if (matchesHostAndProtocol(inputURL, siteURL)) {
@@ -134,8 +134,8 @@ public class PageIndexingServiceImpl implements PageIndexingService {
      * @param path     URL страницы
      * @param response ответ с содержимым страницы
      */
-    private void savePageAndLemmas(SiteEntity site, String path, PageResponse response) {
-        PageEntity page = context.getEntityFactory().createPageEntity(
+    private void savePageAndLemmas(Site site, String path, PageResponse response) {
+        Page page = context.getEntityFactory().createPageEntity(
                 site,
                 path,
                 response.getStatusCode(),
