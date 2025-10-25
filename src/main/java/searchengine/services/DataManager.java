@@ -427,14 +427,14 @@ public class DataManager {
     /**
      * Сохранение списка индексов.
      *
-     * @param indexes список Index
+     * @param indexEntities список Index
      * @return true при успешном сохранении
      */
     @Transactional
-    public boolean saveIndex(List<Index> indexes) {
+    public boolean saveIndex(List<Index> indexEntities) {
         return wrapOperation(() -> {
-            indexRepository.saveAll(indexes);
-            log.debug("{} Список индексов сохранён, count={}", TAG, indexes.size());
+            indexRepository.saveAll(indexEntities);
+            log.debug("{} Список индексов сохранён, count={}", TAG, indexEntities.size());
             return true;
         }, "Ошибка при сохранении списка индексов", false);
     }

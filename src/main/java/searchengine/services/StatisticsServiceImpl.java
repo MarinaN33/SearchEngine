@@ -47,13 +47,13 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     @Override
     public StatisticsResponse getStatistics() {
-        List<Site> sites = context.getDataManager().getAllSites();
-        log.info("{}  Формирование статистики для {} сайтов", TAG, sites.size());
+        List<Site> siteEntities = context.getDataManager().getAllSites();
+        log.info("{}  Формирование статистики для {} сайтов", TAG, siteEntities.size());
 
         stopwatch.start();
 
-        TotalStatistics total = calculateTotal(sites);
-        List<DetailedStatisticsItem> detailed = buildDetailedStatistics(sites);
+        TotalStatistics total = calculateTotal(siteEntities);
+        List<DetailedStatisticsItem> detailed = buildDetailedStatistics(siteEntities);
 
         StatisticsData data = new StatisticsData();
         data.setTotal(total);
@@ -72,15 +72,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     /**
      * Подсчитывает агрегированную статистику по всем сайтам.
      *
-     * @param sites список сайтов
+     * @param siteEntities список сайтов
      * @return {@link TotalStatistics} с суммарным количеством страниц, лемм и состоянием индексации
      */
-    private TotalStatistics calculateTotal(List<Site> sites) {
+    private TotalStatistics calculateTotal(List<Site> siteEntities) {
         TotalStatistics total = new TotalStatistics();
-        total.setSites(sites.size());
+        total.setSites(siteEntities.size());
         total.setIndexing(indexingServiceImp.isIndexing());
 
-        for (Site site : sites) {
+        for (Site site : siteEntities) {
             int pages = site.getPageList().size();
             int lemmas = context.getDataManager().getCountLemmasBySite(site);
 
@@ -94,13 +94,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     /**
      * Формирует детальную статистику для каждого сайта.
      *
-     * @param sites список сайтов
+     * @param siteEntities список сайтов
      * @return список {@link DetailedStatisticsItem} с информацией по каждому сайту
      */
-    private List<DetailedStatisticsItem> buildDetailedStatistics(List<Site> sites) {
+    private List<DetailedStatisticsItem> buildDetailedStatistics(List<Site> siteEntities) {
         List<DetailedStatisticsItem> detailed = new ArrayList<>();
 
-        for (Site site : sites) {
+        for (Site site : siteEntities) {
             DetailedStatisticsItem item = mapSiteToStatisticsItem(site);
             detailed.add(item);
         }

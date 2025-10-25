@@ -73,7 +73,7 @@ spring:
 
 # Настройки сайтов для индексирования
 indexing-settings:
-  sites:
+  siteEntities:
     - url: https://nikoartgallery.com/
       name: Nikoargallery.com
     - url: https://www.playback.ru
@@ -268,7 +268,7 @@ curl -X GET http://localhost:8080/api/statistics
 {
   "totalPages": 120,
   "totalLemmas": 4500,
-  "sites": [
+  "siteEntities": [
     {
       "url": "https://nikoartgallery.com",
       "status": "INDEXED",

@@ -24,32 +24,32 @@ public class SiteTask extends RecursiveAction {
 
     private static final LogTag TAG = LogTag.SITE_TASK;
     private final searchengine.config.Site site;
-    private Site site;
+    private Site siteDto;
     private final IndexingContext context;
 
     @Override
     protected void compute() {
 
-        if (site == null || site.getUrl() == null) return;
+        if (siteDto == null || siteDto.getUrl() == null) return;
 
-        if (context.shouldStop("SiteTask-" + site.getUrl())) return;
+        if (context.shouldStop("SiteTask-" + siteDto.getUrl())) return;
 
-         site = context.getEntityFactory().createSiteEntity(site.getName(), site.getUrl());
-         context.getDataManager().saveSite(site);
-         context.getVisitedUrlStore().activateSite(site);
+         siteDto = context.getEntityFactory().createSiteEntity(siteDto.getName(), siteDto.getUrl());
+         context.getDataManager().saveSite(siteDto);
+         context.getVisitedUrlStore().activateSite(siteDto);
 
         try {
-            log.info("{}  Обработка сайта: {}", TAG, site.getUrl());
+            log.info("{}  Обработка сайта: {}", TAG, siteDto.getUrl());
 
-            List<String> pages = context.getManagerJSOUP().getLinksFromPage(site.getUrl(), site.getUrl());
+            List<String> pages = context.getManagerJSOUP().getLinksFromPage(siteDto.getUrl(), siteDto.getUrl());
 
-            if (context.shouldStop("SiteTask-pages-" + site.getUrl())) return;
+            if (context.shouldStop("SiteTask-pages-" + siteDto.getUrl())) return;
 
-            log.info("{}  Найдено {} внутренних ссылок на {}", TAG, pages.size(), site.getUrl());
+            log.info("{}  Найдено {} внутренних ссылок на {}", TAG, pages.size(), siteDto.getUrl());
 
             List<PageTask> pageTasks = pages.stream()
                     .filter(context.getVisitedUrlStore()::visitUrl)
-                    .map(url -> new PageTask(url, site.getUrl(), context, site))
+                    .map(url -> new PageTask(url, siteDto.getUrl(), context, siteDto))
                     .collect(Collectors.toList());
 
             if (!pageTasks.isEmpty()) {
@@ -61,26 +61,26 @@ public class SiteTask extends RecursiveAction {
             if (hasFailedPages) {
                 failSite("Одна или несколько страниц завершились с ошибкой");
            } else {
-                site.setStatus(Status.INDEXED);
-                site.setLastError(null);
-                site.setStatusTime(LocalDateTime.now());
-                context.getDataManager().saveSite(site);
+                siteDto.setStatus(Status.INDEXED);
+                siteDto.setLastError(null);
+                siteDto.setStatusTime(LocalDateTime.now());
+                context.getDataManager().saveSite(siteDto);
                 log.info("{}  идет подсчет веса лемм", TAG);
-                context.getLemmaFrequencyService().recalculateRankForAllSites(site);
+                context.getLemmaFrequencyService().recalculateRankForAllSites(siteDto);
                 log.info("{}  подсчет веса лемм завершен", TAG);
             }
 
         }catch (Exception e) {
-            log.error("{}  Ошибка при обработке сайта {}: {}", TAG, site.getUrl(), e.getMessage(), e);
+            log.error("{}  Ошибка при обработке сайта {}: {}", TAG, siteDto.getUrl(), e.getMessage(), e);
             failSite(e.getMessage());
         }
     }
 
     private void failSite(String message) {
-        site.setStatus(Status.FAILED);
-        site.setLastError(message);
-        site.setStatusTime(LocalDateTime.now());
-        context.getDataManager().saveSite(site);
+        siteDto.setStatus(Status.FAILED);
+        siteDto.setLastError(message);
+        siteDto.setStatusTime(LocalDateTime.now());
+        context.getDataManager().saveSite(siteDto);
     }
 
 }

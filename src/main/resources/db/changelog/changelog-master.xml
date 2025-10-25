@@ -7,31 +7,25 @@
 
     <include file="db/changelog/init-tables.xml"/>
 
-    <changeSet id="1" author="Marina">
-        <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
-    </changeSet>
-
-    <changeSet id="2" author="Marina">
+    <changeSet id="modify-page-path-type" author="Marina">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_path" tableName="pages"/>
+                <columnExists tableName="page" columnName="path"/>
             </not>
         </preConditions>
-        <createIndex indexName="idx_path" tableName="pages">
-            <column name="path" type="varchar(255)"/>
+        <modifyDataType tableName="page" columnName="path" newDataType="TEXT"/>
+    </changeSet>
+
+    <changeSet id="create-idx-page-path" author="Marina">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_page_path" tableName="page"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_page_path" tableName="page">
+            <column name="path"/>
         </createIndex>
     </changeSet>
 
-    <changeSet id="3" author="Marina">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists indexName="idx_path" tableName="pages"/>
-            </not>
-        </preConditions>
-        <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
-        <sql>
-            CREATE INDEX idx_path ON pages (path(255));
-        </sql>
-    </changeSet>
-
 </databaseChangeLog>
+

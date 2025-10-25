@@ -1,8 +1,10 @@
 server:
   port: 8080
+
 logging:
   level:
     org.apache.coyote.http11.Http11Processor: ERROR
+
 rickbot:
   user-agents:
     - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
@@ -12,12 +14,10 @@ rickbot:
   max-delay-ms: 2000
   referer: "https://github.com/MarinaN33/searchengine/blob/main/README.md"
 
-
 spring:
-
   datasource:
-    username: root
-    password: Ric137!Marina!
+    username: postgres
+    password: root
     url: jdbc:postgresql://localhost:5432/search_engine
   jpa:
     properties:
@@ -26,13 +26,12 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
-
-    liquibase:
-      change-log: classpath:db/changelog/changelog-master.xml
+  liquibase:
+    change-log: classpath:db/changelog/init-tables.xml
 
 indexing-settings:
   sites:
     - url: https://nikoartgallery.com/
       name: Nikoargallery.com
-    - url: https://www.playback.ru
-      name: PlayBack.Ru
+
+

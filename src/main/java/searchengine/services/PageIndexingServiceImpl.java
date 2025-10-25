@@ -88,16 +88,16 @@ public class PageIndexingServiceImpl implements PageIndexingService {
      * @return {@link Site} сайта или null, если сайт не найден
      */
     private Site findSiteForUrl(String url) {
-        List<Site> sites = context.getDataManager().getAllSites();
+        List<Site> siteEntities = context.getDataManager().getAllSites();
 
-        if (sites.isEmpty()) {
+        if (siteEntities.isEmpty()) {
             log.warn("{}  База сайтов пуста! Добавьте хотя бы один сайт.", TAG);
             return null;
         }
 
         try {
             URL inputURL = new URL(url);
-            for (Site site : sites) {
+            for (Site site : siteEntities) {
                 try {
                     URL siteURL = new URL(site.getUrl());
                     if (matchesHostAndProtocol(inputURL, siteURL)) {
@@ -136,7 +136,7 @@ public class PageIndexingServiceImpl implements PageIndexingService {
      */
     private void savePageAndLemmas(Site site, String path, PageResponse response) {
         Page page = context.getEntityFactory().createPageEntity(
-                site,
+        site,
                 path,
                 response.getStatusCode(),
                 response.getBody()

@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!-- ========================================= -->
-    <!-- 1. Таблица sites                         -->
-    <!-- ========================================= -->
     <changeSet id="init-1" author="rik">
         <createTable tableName="site">
-            <column name="id" type="INT" autoIncrement="true">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="status" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="status_time" type="DATETIME">
+            <column name="status_time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="last_error" type="TEXT"/>
@@ -29,12 +25,9 @@
         </createTable>
     </changeSet>
 
-    <!-- ========================================= -->
-    <!-- 2. Таблица page                          -->
-    <!-- ========================================= -->
     <changeSet id="init-2" author="rik">
         <createTable tableName="page">
-            <column name="id" type="INT" autoIncrement="true">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="site_id" type="INT">
@@ -47,22 +40,19 @@
             <column name="code" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="content" type="MEDIUMTEXT">
+            <column name="content" type="TEXT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
         <createIndex tableName="page" indexName="idx_page_path">
-            <column name="path" type="varchar(255)"/>
+            <column name="path"/>
         </createIndex>
     </changeSet>
 
-    <!-- ========================================= -->
-    <!-- 3. Таблица lemma                         -->
-    <!-- ========================================= -->
     <changeSet id="init-3" author="rik">
         <createTable tableName="lemma">
-            <column name="id" type="INT" autoIncrement="true">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="site_id" type="INT">
@@ -83,12 +73,9 @@
         </createIndex>
     </changeSet>
 
-    <!-- ========================================= -->
-    <!-- 4. Таблица search_index                  -->
-    <!-- ========================================= -->
     <changeSet id="init-4" author="rik">
         <createTable tableName="search_index">
-            <column name="id" type="INT" autoIncrement="true">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="page_id" type="INT">
@@ -111,3 +98,5 @@
     </changeSet>
 
 </databaseChangeLog>
+
+

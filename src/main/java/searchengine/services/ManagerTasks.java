@@ -78,8 +78,8 @@ public class ManagerTasks {
      * <p>Все активные сайты получают статус FAILED с указанием ошибки.
      */
     private void updateSitesAfterStop() {
-        Collection<Site> activeSites = context.getVisitedUrlStore().getActiveSites();
-        for (Site site : activeSites) {
+        Collection<Site> activeSiteEntities = context.getVisitedUrlStore().getActiveSites();
+        for (Site site : activeSiteEntities) {
             site.setStatus(Status.FAILED);
             site.setLastError("Пользователь остановил индексацию");
             site.setStatusTime(LocalDateTime.now());

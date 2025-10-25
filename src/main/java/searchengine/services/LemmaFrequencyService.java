@@ -133,18 +133,18 @@ public class LemmaFrequencyService {
     @Transactional
     public void recalculateRankForAllSites(Site site) {
         int totalPages = dataManager.getCountPagesBySite(site);
-        List<Lemma> lemmas = dataManager.findAllLemmasBySite(site);
+        List<Lemma> lemmaEntities = dataManager.findAllLemmasBySite(site);
 
-        for (Lemma lemma : lemmas) {
+        for (Lemma lemma : lemmaEntities) {
             int df = dataManager.getCountPagesWhereLemma(lemma, site);
-            List<Index> indexes = dataManager.getAllIndexesBySite(lemma, site);
+            List<Index> indexEntities = dataManager.getAllIndexesBySite(lemma, site);
 
-            for (Index index : indexes) {
+            for (Index index : indexEntities) {
                 float tf = index.getRank();
                 float newRank = (float) (tf * Math.log((double) totalPages / (df + 1)));
                 index.setRank(newRank);
             }
-            dataManager.saveIndex(indexes);
+            dataManager.saveIndex(indexEntities);
         }
     }
 
@@ -204,14 +204,14 @@ public class LemmaFrequencyService {
             return List.of();
         }
 
-        List<Index> indexes = findIndexesForAllLemmas(filtered, url);
-        if (indexes.isEmpty()) {
+        List<Index> indexEntities = findIndexesForAllLemmas(filtered, url);
+        if (indexEntities.isEmpty()) {
             log.info("{}  Поиск не дал результатов — пересечение пусто", TAG);
             return List.of();
         }
 
-        Map<Page, Float> absolute = calcAbsoluteRank(indexes);
-        Map<Page, Float> relative = calcRelativeRank(absolute, indexes, lemmas);
+        Map<Page, Float> absolute = calcAbsoluteRank(indexEntities);
+        Map<Page, Float> relative = calcRelativeRank(absolute, indexEntities, lemmas);
         SearchBuilder builder = new SearchBuilder();
         List<SearchResult> results = builder.build(relative, offset, limit, query);
 
@@ -223,26 +223,26 @@ public class LemmaFrequencyService {
      * Находит индексы страниц для всех лемм.
      * <p>Если указан URL, выполняет пересечение страниц по леммам для одного сайта; иначе объединяет все страницы по леммам.
      *
-     * @param lemmas список лемм
+     * @param lemmaEntities список лемм
      * @param url сайт или null
      * @return список индексов страниц
      */
-    private List<Index> findIndexesForAllLemmas(List<Lemma> lemmas, String url) {
-        if (lemmas.isEmpty()) return List.of();
+    private List<Index> findIndexesForAllLemmas(List<Lemma> lemmaEntities, String url) {
+        if (lemmaEntities.isEmpty()) return List.of();
 
         if (url != null && !url.isBlank()) {
-            List<Index> baseIndexes = new ArrayList<>(lemmas.get(0).getIndexList());
-            for (int i = 1; i < lemmas.size(); i++) {
-                Set<Integer> pagesWithCurrentLemma = lemmas.get(i).getIndexList().stream()
+            List<Index> baseIndexEntities = new ArrayList<>(lemmaEntities.get(0).getIndexList());
+            for (int i = 1; i < lemmaEntities.size(); i++) {
+                Set<Integer> pagesWithCurrentLemma = lemmaEntities.get(i).getIndexList().stream()
                         .map(idx -> idx.getPage().getId())
                         .collect(Collectors.toSet());
-                baseIndexes = baseIndexes.stream()
+                baseIndexEntities = baseIndexEntities.stream()
                         .filter(idx -> pagesWithCurrentLemma.contains(idx.getPage().getId()))
                         .toList();
             }
-            return baseIndexes;
+            return baseIndexEntities;
         } else {
-            return lemmas.stream()
+            return lemmaEntities.stream()
                     .flatMap(l -> l.getIndexList().stream())
                     .distinct() // убираем дубликаты
                     .toList();
@@ -253,12 +253,12 @@ public class LemmaFrequencyService {
      * Вычисляет абсолютный ранг страниц.
      * <p>Суммирует веса всех индексов страницы.
      *
-     * @param indexes список индексов
+     * @param indexEntities список индексов
      * @return карта страниц и их абсолютного ранга
      */
-    private Map<Page, Float> calcAbsoluteRank(List<Index> indexes) {
+    private Map<Page, Float> calcAbsoluteRank(List<Index> indexEntities) {
         Map<Page, Float> pageRanks = new HashMap<>();
-        for (Index idx : indexes) {
+        for (Index idx : indexEntities) {
             pageRanks.merge(idx.getPage(), idx.getRank(), Float::sum);
         }
         log.info("{}  Вычислена абсолютная релевантность для {} страниц", TAG, pageRanks.size());
@@ -270,14 +270,14 @@ public class LemmaFrequencyService {
      * <p>Скорректированный ранг учитывает частоту совпадения лемм в запросе и нормализуется по максимальному значению.
      *
      * @param absoluteRanks карта страниц и их абсолютного ранга
-     * @param indexes список индексов
+     * @param indexEntities список индексов
      * @param queryLemmas список лемм поискового запроса
      * @return карта страниц и их относительного ранга, отсортированная по убыванию
      */
-    private Map<Page, Float> calcRelativeRank(Map<Page, Float> absoluteRanks, List<Index> indexes, List<String> queryLemmas) {
+    private Map<Page, Float> calcRelativeRank(Map<Page, Float> absoluteRanks, List<Index> indexEntities, List<String> queryLemmas) {
         if (absoluteRanks.isEmpty()) return Map.of();
         Map<Page, Integer> lemmaMatches = new HashMap<>();
-        for (Index idx : indexes) {
+        for (Index idx : indexEntities) {
             lemmaMatches.merge(idx.getPage(), 1, Integer::sum);
         }
 
