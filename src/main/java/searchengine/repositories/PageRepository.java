@@ -28,7 +28,7 @@ public interface PageRepository extends JpaRepository<Page, Integer> {
      * @param siteId ID сайта
      * @return список страниц
      */
-    List<Page> findBySiteEntity_Id(int siteId);
+    List<Page> findBySite_Id(int siteId);
 
     /**
      * Получает все страницы для сайта по объекту сайта.
@@ -36,7 +36,7 @@ public interface PageRepository extends JpaRepository<Page, Integer> {
      * @param site объект сайта
      * @return список страниц
      */
-    List<Page> findAllBySiteEntity(Site site);
+    List<Page> findAllBySite(Site site);
 
     /**
      * Подсчитывает количество страниц сайта по ID.
@@ -44,5 +44,7 @@ public interface PageRepository extends JpaRepository<Page, Integer> {
      * @param siteId ID сайта
      * @return количество страниц
      */
-    int countBySiteEntity_Id(int siteId);
+    int countBySite_Id(int siteId);
 }
+
+

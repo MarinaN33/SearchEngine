@@ -179,7 +179,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public List<Page> getAllPagesBySite(Site site) {
-        return wrapOperation(() -> pageRepository.findAllBySiteEntity(site),
+        return wrapOperation(() -> pageRepository.findAllBySite(site),
                 "Ошибка при поиске страниц на сайте " + site.getId(), Collections.emptyList());
     }
 
@@ -191,7 +191,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public int getCountPagesBySite(Site site) {
-        return wrapOperation(() -> pageRepository.countBySiteEntity_Id(site.getId()),
+        return wrapOperation(() -> pageRepository.countBySite_Id(site.getId()),
                 "Ошибка при подсчёте страниц сайта " + site.getId(), 0);
     }
 
@@ -272,7 +272,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public Optional<Lemma> findLemma(String lemma, int siteId) {
-        return wrapOperation(() -> lemmaRepository.findByLemmaAndSiteEntity_Id(lemma, siteId),
+        return wrapOperation(() -> lemmaRepository.findByLemmaAndSite_Id(lemma, siteId),
                 "Ошибка при поиске леммы " + lemma + " на сайте " + siteId, Optional.empty());
     }
 
@@ -297,7 +297,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public List<Lemma> findAllLemmasBySite(Site site) {
-        return wrapOperation(() -> lemmaRepository.findBySiteEntity(site),
+        return wrapOperation(() -> lemmaRepository.findBySite(site),
                 "Ошибка при поиске лемм на сайте " + site.getId(), Collections.emptyList());
     }
 
@@ -322,7 +322,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public List<Lemma> findLemmas(List<String> names, String siteUrl) {
-        return wrapOperation(() -> lemmaRepository.findByLemmaInAndSiteEntity_Url(names, siteUrl),
+        return wrapOperation(() -> lemmaRepository.findByLemmaInAndSite_Url(names, siteUrl),
                 "Ошибка при поиске лемм " + names + " на сайте " + siteUrl, Collections.emptyList());
     }
 
@@ -334,7 +334,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public int getCountLemmasBySite(Site site) {
-        return wrapOperation(() -> lemmaRepository.countBySiteEntity_Id(site.getId()),
+        return wrapOperation(() -> lemmaRepository.countBySite_Id(site.getId()),
                 "Ошибка при подсчёте лемм на сайте " + site.getId(), 0);
     }
 
@@ -391,7 +391,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public List<Index> getAllIndexesBySite(Lemma lemma, Site site) {
-        return wrapOperation(() -> indexRepository.findByLemmaAndPage_SiteEntity(lemma, site),
+        return wrapOperation(() -> indexRepository.findByLemmaAndPage_Site(lemma, site),
                 "Ошибка при поиске индексов на сайте c id=" + site.getId(),
                 Collections.emptyList());
     }
@@ -405,7 +405,7 @@ public class DataManager {
      */
     @Transactional(readOnly = true)
     public int getCountPagesWhereLemma(Lemma lemma, Site site) {
-        return wrapOperation(() -> indexRepository.countDistinctByLemmaAndPage_SiteEntity(lemma, site),
+        return wrapOperation(() -> indexRepository.countDistinctByLemmaAndPage_Site(lemma, site),
                 "Ошибка при подсчёте страниц на сайте " + site.getId(), 0);
     }
 

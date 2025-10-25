@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "pages", indexes = {
+@Table(name = "page", indexes = {
         @javax.persistence.Index(name = "idx_path", columnList = "path")
 })
 

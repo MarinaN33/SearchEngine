@@ -22,7 +22,7 @@ public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
      * @param siteId ID сайта
      * @return Optional с найденной леммой
      */
-    Optional<Lemma> findByLemmaAndSiteEntity_Id(String lemma, Integer siteId);
+    Optional<Lemma> findByLemmaAndSite_Id(String lemma, Integer siteId);
 
     /**
      * Находит лемму по тексту и объекту сайта.
@@ -48,7 +48,7 @@ public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
      * @param site объект сайта
      * @return список лемм
      */
-    List<Lemma> findBySiteEntity(Site site);
+    List<Lemma> findBySite(Site site);
 
     /**
      * Получает все леммы по списку текстов.
@@ -65,7 +65,7 @@ public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
      * @param siteUrl URL сайта
      * @return список лемм
      */
-    List<Lemma> findByLemmaInAndSiteEntity_Url(List<String> names, String siteUrl);
+    List<Lemma> findByLemmaInAndSite_Url(List<String> names, String siteUrl);
 
     /**
      * Подсчитывает количество лемм для сайта по ID.
@@ -73,6 +73,6 @@ public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
      * @param siteId ID сайта
      * @return количество лемм
      */
-    int countBySiteEntity_Id(Integer siteId);
+    int countBySite_Id(Integer siteId);
 }
 

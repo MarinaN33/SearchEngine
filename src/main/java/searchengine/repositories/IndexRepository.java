@@ -21,7 +21,7 @@ public interface IndexRepository extends JpaRepository<Index, Integer> {
      * @param site сайт, на котором ищем лемму
      * @return количество страниц с данной леммой
      */
-    int countDistinctByLemmaAndPage_SiteEntity(Lemma lemma, Site site);
+    int countDistinctByLemmaAndPage_Site(Lemma lemma, Site site);
 
     /**
      * Получает все индексы указанной леммы на конкретном сайте.
@@ -30,6 +30,6 @@ public interface IndexRepository extends JpaRepository<Index, Integer> {
      * @param site сайт, на котором ищем индексы
      * @return список {@link Index} для данной леммы на сайте
      */
-    List<Index> findByLemmaAndPage_SiteEntity(Lemma lemma, Site site);
+    List<Index> findByLemmaAndPage_Site(Lemma lemma, Site site);
 
 }

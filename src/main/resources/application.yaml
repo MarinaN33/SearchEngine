@@ -24,8 +24,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: none
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
   liquibase:
     change-log: classpath:db/changelog/init-tables.xml
 
@@ -33,5 +33,7 @@ indexing-settings:
   sites:
     - url: https://nikoartgallery.com/
       name: Nikoargallery.com
+    - url: http://www.playback.ru/
+      name: playback.com
 
 

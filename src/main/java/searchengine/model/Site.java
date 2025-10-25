@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "sites")
+@Table(name = "site")
 
 public class Site {
 
@@ -49,10 +49,10 @@ public class Site {
     private String name;
 
     /** Список страниц сайта */
-    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "site", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Page> pageList = new ArrayList<>();
 
     /** Список лемм сайта */
-    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "site", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Lemma> lemmaList = new ArrayList<>();
 }

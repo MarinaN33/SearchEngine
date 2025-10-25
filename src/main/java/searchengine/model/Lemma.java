@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "lemmas")
+@Table(name = "lemma")
 public class Lemma {
 
     /** Уникальный идентификатор записи. */

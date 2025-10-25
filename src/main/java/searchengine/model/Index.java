@@ -17,7 +17,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name="search_indexes")
+@Table(name="search_index")
 
 public class Index {
 
