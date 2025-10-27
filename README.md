@@ -39,6 +39,43 @@ Liquibase — управление версионированием базы д�
 Ниже пример конфигурации с пояснениями:
 
 ```yaml
+server:
+  port: 8080
+
+logging:
+  level:
+    org.apache.coyote.http11.Http11Processor: ERROR
+
+rickbot:
+  user-agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15"
+    - "RickBot/1.0 (compatible; MSIE 10.0; Windows NT)"
+  min-delay-ms: 500
+  max-delay-ms: 2000
+  referer: "https://github.com/MarinaN33/searchengine/blob/main/README.md"
+
+spring:
+  datasource:
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/search_engine
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  liquibase:
+    change-log: classpath:db/changelog/init-tables.xml
+
+indexing-settings:
+  sites:
+    - url: https://nikoartgallery.com/
+      name: Nikoargallery.com
+    - url: https://www.playback.ru
+      name: Playback.Ru
 
 🔹 Комментарии помогают понять, что делает каждый блок и как менять конфигурацию под свои сайты и БД.
 
