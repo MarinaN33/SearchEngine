@@ -26,6 +26,6 @@
             <column name="path"/>
         </createIndex>
     </changeSet>
-
 </databaseChangeLog>
+
 
