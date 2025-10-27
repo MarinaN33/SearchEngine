@@ -15,9 +15,9 @@ SearchEngine — это Spring Boot приложение, реализующее
 - **Фреймворк:** Spring Boot 2.7.1
 - **HTML-парсер:** Jsoup 1.16.1
 - **ORM:** Spring Data JPA
-- **База данных:** MySQL
+- **База данных:** PostgreSQL
 - **Управление зависимостями:** Maven
-- **Логирование и утилиты:** Lombok 1.18.32, SLF4J
+- **Логирование и утилиты:** Lombok, SLF4J
 - **Миграции БД:** Liquibase
 - **Шаблоны (если веб-интерфейс):** Thymeleaf
 
@@ -39,45 +39,7 @@ Liquibase — управление версионированием базы д�
 Ниже пример конфигурации с пояснениями:
 
 ```yaml
-server:
-  port: 8080 # Порт, на котором будет запущен Spring Boot сервер
 
-logging:
-  level:
-    org.apache.coyote.http11.Http11Processor: ERROR # Убираем шум логов Tomcat
-
-# Настройки RickBot — робота, который обходит сайты и индексирует страницы
-rickbot:
-  user-agents:
-    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-    - "RickBot/1.0"
-  min-delay-ms: 500 # минимальная задержка между запросами
-  max-delay-ms: 2000 # максимальная задержка между запросами
-  referer: "https://github.com/yourusername/searchengine/blob/main/README.md"
-
-spring:
-  liquibase:
-    change-log: classpath:db/changelog/changelog-master.xml # Скрипты миграции базы
-  datasource:
-    username: root
-    password: password_here
-    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&allowPublicKeyRetrieval=true
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    hibernate:
-      ddl-auto: none # управление схемой БД (используется Liquibase)
-    show-sql: false # для отладки — вывод SQL-запросов
-
-# Настройки сайтов для индексирования
-indexing-settings:
-  siteEntities:
-    - url: https://nikoartgallery.com/
-      name: Nikoargallery.com
-    - url: https://www.playback.ru
-      name: PlayBack.Ru
 🔹 Комментарии помогают понять, что делает каждый блок и как менять конфигурацию под свои сайты и БД.
 
 Структура проекта
@@ -115,48 +77,7 @@ mvn spring-boot:run
  Миграции базы данных (Liquibase)
 Перед использованием проекта убедитесь, что база данных создана и доступна.
 Пример конфигурации в application.yml для Liquibase:
-spring:
-  liquibase:
-    change-log: classpath:db/changelog/changelog-master.xml
-Файл src/main/resources/db/changelog/changelog-master.xml содержит версионированные изменения схемы, например:  
-```html
-<databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!-- 1. Изменяем тип колонки path на TEXT -->
-    <changeSet id="1" author="rik">
-        <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
-    </changeSet>
-
-    <!-- 2. Создаём индекс по path, если его нет -->
-    <changeSet id="2" author="rik">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists indexName="idx_path" tableName="pages"/>
-            </not>
-        </preConditions>
-        <createIndex indexName="idx_path" tableName="pages">
-            <column name="path" type="varchar(255)"/>
-        </createIndex>
-    </changeSet>
-
-    <!-- 3. Альтернатива через SQL -->
-    <changeSet id="3" author="rik">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists indexName="idx_path" tableName="pages"/>
-            </not>
-        </preConditions>
-        <modifyDataType tableName="pages" columnName="path" newDataType="TEXT"/>
-        <sql>
-            CREATE INDEX idx_path ON pages (path(255));
-        </sql>
-    </changeSet>
-
-</databaseChangeLog>
 ```
 💡 Примечания:
 Liquibase автоматически применяет все изменения при старте приложения.
