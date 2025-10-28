@@ -7,6 +7,9 @@ import searchengine.logs.LogTag;
 import searchengine.services.serviceinterfaces.IndexingService;
 import searchengine.services.util.Stopwatch;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Реализация сервиса индексации сайтов.
  *
@@ -33,6 +36,8 @@ public class IndexingServiceImpl implements IndexingService {
     /** Таймер для измерения времени индексации. */
     private Stopwatch stopwatch = new Stopwatch();
 
+    /** Пул потоков для асинхронного запуска задач */
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Проверяет, выполняется ли в данный момент индексация.
@@ -47,16 +52,30 @@ public class IndexingServiceImpl implements IndexingService {
     /**
      * Запускает процесс индексации всех сайтов.
      */
-    @Override
-    public void startIndexing(){
-        setStatusIndexing(true);
-        stopwatch.start();
-        managerTasks.startIndexTask();
-        stopwatch.stop();
-        setStatusIndexing(false);
-        log.info("{}  Индексация прошла за {} cek.", TAG, stopwatch.getSeconds());
-        stopwatch.reset();
+   @Override
+public void startIndexing() {
+    if (isIndexing()) {
+        log.warn("{} Индексация уже запущена", TAG);
+        return;
     }
+    if (executor.isShutdown() || executor.isTerminated()) {
+        executor = Executors.newSingleThreadExecutor();
+    }
+
+    setStatusIndexing(true);
+    executor.submit(() -> {
+        try {
+            stopwatch.start();
+            managerTasks.startIndexTask();
+        } catch (Exception e) {
+            log.error("{} Ошибка при индексации", TAG, e);
+        } finally {
+            stopwatch.stop();
+            stopwatch.reset();
+            setStatusIndexing(false);
+        }
+    });
+}
 
     /**
      * Останавливает текущую индексацию.
