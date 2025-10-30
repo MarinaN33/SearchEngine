@@ -212,7 +212,6 @@ public class SearchBuilder {
  */
 private String buildSnippetRecursive(List<String> lemmas, String text, int index) {
     if (index >= lemmas.size()) {
-        // Ничего не нашли — возвращаем начало текста
         return text.substring(0, Math.min(text.length(), SNIPPET_MAX_LENGTH));
     }
 
@@ -222,22 +221,15 @@ private String buildSnippetRecursive(List<String> lemmas, String text, int index
 
     int matchIndex = lowerText.indexOf(pattern);
     if (matchIndex != -1) {
-        // Сниппет начинается С НАЙДЕННОГО слова
         int start = matchIndex;
         int end = Math.min(text.length(), start + SNIPPET_MAX_LENGTH);
-
-        // Вырезаем фрагмент из оригинального текста (с сохранением регистра)
         String snippet = text.substring(start, end).trim();
-
-        // Подсвечиваем совпадение
         Pattern highlightPattern = Pattern.compile("(?i)" + Pattern.quote(pattern));
         Matcher matcher = highlightPattern.matcher(snippet);
         snippet = matcher.replaceAll("<b>$0</b>");
 
         return snippet;
     }
-
-    // Ищем следующую лемму
     return buildSnippetRecursive(lemmas, text, index + 1);
 }
 
